@@ -1,7 +1,6 @@
 package healtcheck
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/micro/cli"
@@ -16,7 +15,7 @@ func (eh *enableHealthCheck) Flags() []cli.Flag {
 	return []cli.Flag{
 		cli.StringFlag{
 			Name:   "health-check-path",
-			Usage:  "The URL path for the health check (default is 'health')",
+			Usage:  "The URL path for the health check (default is '/health')",
 			EnvVar: "HEALTH_CHECK_PATH",
 		},
 	}
@@ -29,11 +28,10 @@ func (eh *enableHealthCheck) Commands() []cli.Command {
 func (eh *enableHealthCheck) Handler() plugin.Handler {
 	return func(ha http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Printf("Path: %v\n", r.URL.Path)
-
 			if r.URL.Path == eh.healthCheckPath {
 				w.WriteHeader(200)
-				w.Write([]byte("Health Check"))
+				w.Write([]byte("Micro Health Check"))
+				return
 			}
 
 			ha.ServeHTTP(w, r)
@@ -55,5 +53,5 @@ func (eh *enableHealthCheck) String() string {
 
 // NewPlugin creates the HealthCheck plugin
 func NewPlugin() plugin.Plugin {
-	return &enableHealthCheck{healthCheckPath: "health"}
+	return &enableHealthCheck{healthCheckPath: "/health"}
 }
